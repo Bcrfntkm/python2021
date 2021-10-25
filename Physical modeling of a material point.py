@@ -9,7 +9,7 @@ dt = 0.1
 g = -9.8
 ay = 0.95
 ax = 0.95
-k = -0.05
+k = -0.005
 
 turtle.shape('circle')
 turtle.speed(1000)
@@ -23,8 +23,8 @@ turtle.speed(200)
 while True:
     x += vx * dt
     y += vy * dt + g * dt ** 2 / 2
-    vy += g * dt + k * vy * dt
-    vx += k * vx * dt
+    vy += g * dt + k * vy
+    vx += k * vx
 
     if y <= 0:
         y = 0
