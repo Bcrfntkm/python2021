@@ -8,6 +8,7 @@ FPS = 30
 g = -2
 k = -0.01
 ax = ay = 0.91
+interval = 91
 
 RED = 0xFF0000
 BLUE = 0x0000FF
@@ -39,6 +40,7 @@ class Ball:
         self.vy = -100
         self.color = choice(GAME_COLORS)
         self.live = 30
+        self.flag = True
 
     def move(self):
         """Переместить мяч по прошествии единицы времени.
@@ -52,6 +54,8 @@ class Ball:
         self.y -= self.vy + g
         self.vy += g + k * self.vy
         self.vx += k * self.vx
+        if abs(self.vy) < 1.3 and abs(self.vx) < 1.3:
+            self.flag = False
 
 
     def draw(self):
@@ -62,11 +66,12 @@ class Ball:
             self.r
         )
 
-    def hittest(self, obj: tuple, wall: tuple):
+    def hittest(self, obj, wall: tuple):
         """Функция проверяет сталкивалкивается ли данный обьект с целью, описываемой в обьекте obj.
 
         Args:
             obj: Обьект, с которым проверяется столкновение.
+            wall: Объект стена, с которым тоже проверяется столкновение
         Returns:
             Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
         """
@@ -163,6 +168,7 @@ class Target:
         self.points = 0
         self.live = 1
         self.new_target()
+        self.shoots = 1
 
     def new_target(self):
         """ Инициализация новой цели. """
@@ -191,11 +197,16 @@ target = Target()
 finished = False
 
 while not finished:
+    interval += 1
     screen.fill(WHITE)
     gun.draw()
-    target.draw()
+    if interval > 90:
+        target.draw()
     for b in balls:
-        b.draw()
+        if b.flag:
+            b.draw()
+        else:
+            balls.remove(b)
     pygame.display.update()
 
     clock.tick(FPS)
@@ -211,10 +222,14 @@ while not finished:
 
     for b in balls:
         b.move()
-        if b.hittest(target, (HEIGHT, WIDTH)) and target.live:
+        if b.hittest(target, (HEIGHT-b.r, WIDTH-b.r)) and target.live:
+            interval = 0
             target.live = 0
             target.hit()
-            target.new_target()
+        elif target.live:
+            target.shoots += 1
+    if interval == 90:
+        target.new_target()
     gun.power_up()
 
 pygame.quit()
